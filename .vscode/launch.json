@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/ellia/OneDrive/Área de Trabalho/atividades_a2/atividade1",
-      "program": "c:/Users/ellia/OneDrive/Área de Trabalho/atividades_a2/atividade1/build/Debug/outDebug",
+      "cwd": "c:/Users/ellia/OneDrive/Área de Trabalho/infix_to_posfix",
+      "program": "c:/Users/ellia/OneDrive/Área de Trabalho/infix_to_posfix/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

@@ -59,36 +59,43 @@ Pilha *criaPilha() {
 }
 
 void infixaParaPosfixa(char infix[], char posfix[]) {
-    Pilha *ops = criaPilha();
-    int j = 0;
+    Pilha *operacoes = criaPilha();
+    int aux_count = 0;
 
     for (int i = 0; i < strlen(infix); i++) {
-        if (infix[i] >= '0' && infix[i] <= '9') {
-            posfix[j] = infix[i];
-            j++;
-        } else if (infix[i] == '(') {
-            empilhar(ops, infix[i]);
+        if(infix[i] >= '0' && infix[i] <= '9') {
+            posfix[aux_count] = infix[i];
+            aux_count++;
         } else if (infix[i] == '/' || infix[i] == '*' || infix[i] == '+' || infix[i] == '-') {
-            while (!pilhaEstaVazia(*ops) && ops->elementos[ops->topo] != '(') {
-                posfix[j] = desempilhar(ops);
-                j++;
+            empilhar(operacoes, infix[i]);
+        } else if(infix[i] == '(') {
+            Pilha *operacoes_aux = criaPilha();
+            for(i; infix[i] != ')'; i++) {
+                if (infix[i] == '/' || infix[i] == '*' || infix[i] == '+' || infix[i] == '-') {
+                    empilhar(operacoes_aux, infix[i]);
+                } else if(infix[i] >= '0' && infix[i] <= '9') {
+                    posfix[aux_count] = infix[i];
+                    aux_count++;
+                }
             }
-            empilhar(ops, infix[i]);
-        } else if (infix[i] == ')') {
-            while (!pilhaEstaVazia(*ops) && ops->elementos[ops->topo] != '(') {
-                posfix[j] = desempilhar(ops);
-                j++;
+            while(!pilhaEstaVazia(*operacoes_aux)) {
+                posfix[aux_count] = desempilhar(operacoes_aux);
+                aux_count++;
             }
-            desempilhar(ops); 
+            
+            while(!pilhaEstaVazia(*operacoes)) {
+                posfix[aux_count] = desempilhar(operacoes);
+                aux_count++;
+            }
         }
     }
-
-    while (!pilhaEstaVazia(*ops)) {
-        posfix[j] = desempilhar(ops);
-        j++;
+    
+    while (!pilhaEstaVazia(*operacoes)) {
+        posfix[aux_count] = desempilhar(operacoes);
+        aux_count++;
     }
 
-    posfix[j] = '\0';
+    posfix[aux_count] = '\0';
 }
 
 double analisaExpressao(char posfix[]) {
