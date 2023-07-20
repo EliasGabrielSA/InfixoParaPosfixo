@@ -16,11 +16,6 @@ short int pilhaEstaVazia(Pilha p) {
         return 0;
 }
 
-void esvaziarPilha(Pilha *p) {
-    p->topo = -1;
-}
-
-
 void empilhar(Pilha *p, char elem) {
     if (p->topo < MAX - 1) {
         p->elementos[++p->topo] = elem;
@@ -40,16 +35,6 @@ char desempilhar(Pilha *p) {
     return ret;
 }
 
-void imprimirPilha(Pilha p) {
-    if (!pilhaEstaVazia(p)) {
-        for (int i = p.topo; i >= 0; i--) {
-            printf("%c", p.elementos[i]);
-        }
-    } else {
-        printf("Pilha vazia\n");
-    }
-}
-
 Pilha *criaPilha() {
     Pilha *novaPilha = (Pilha*) malloc(sizeof(Pilha));
     if (novaPilha != NULL) {
@@ -58,54 +43,55 @@ Pilha *criaPilha() {
     return novaPilha;
 }
 
-void infixaParaPosfixa(char infix[], char posfix[]) {
-    Pilha *operacoes = criaPilha();
-    int aux_count = 0;
-
-    for (int i = 0; i < strlen(infix); i++) {
-        if(infix[i] >= '0' && infix[i] <= '9') {
-            posfix[aux_count] = infix[i];
-            aux_count++;
-        } else if (infix[i] == '/' || infix[i] == '*' || infix[i] == '+' || infix[i] == '-') {
-            empilhar(operacoes, infix[i]);
-        } else if(infix[i] == '(') {
-            Pilha *operacoes_aux = criaPilha();
-            for(i; infix[i] != ')'; i++) {
-                if (infix[i] == '/' || infix[i] == '*' || infix[i] == '+' || infix[i] == '-') {
-                    empilhar(operacoes_aux, infix[i]);
-                } else if(infix[i] >= '0' && infix[i] <= '9') {
-                    posfix[aux_count] = infix[i];
-                    aux_count++;
-                }
-            }
-            while(!pilhaEstaVazia(*operacoes_aux)) {
-                posfix[aux_count] = desempilhar(operacoes_aux);
-                aux_count++;
-            }
-            
-            while(!pilhaEstaVazia(*operacoes)) {
-                posfix[aux_count] = desempilhar(operacoes);
-                aux_count++;
-            }
-        }
-    }
-    
-    while (!pilhaEstaVazia(*operacoes)) {
-        posfix[aux_count] = desempilhar(operacoes);
-        aux_count++;
-    }
-
-    posfix[aux_count] = '\0';
+int precedencia(char op) {
+    if (op == '+' || op == '-')
+        return 1;
+    else if (op == '*' || op == '/')
+        return 2;
+    return 0;
 }
 
-double analisaExpressao(char posfix[]) {
+void infixaParaPosfixa(char infix[], char posfix[]) {
+    Pilha *ops = criaPilha();
+    int j = 0;
+
+    for (int i = 0; i < strlen(infix); i++) {
+        if (infix[i] >= '0' && infix[i] <= '9') {
+            int k = i;
+            while (infix[k] >= '0' && infix[k] <= '9') {
+                posfix[j++] = infix[k++];
+            }
+            i = k - 1;
+        } else if (infix[i] == '(') {
+            empilhar(ops, infix[i]);
+        } else if (infix[i] == ')') {
+            while (!pilhaEstaVazia(*ops) && ops->elementos[ops->topo] != '(') {
+                posfix[j++] = desempilhar(ops);
+            }
+            desempilhar(ops);
+        } else if (infix[i] == '+' || infix[i] == '-' || infix[i] == '*' || infix[i] == '/') {
+            while (!pilhaEstaVazia(*ops) && precedencia(ops->elementos[ops->topo]) >= precedencia(infix[i])) {
+                posfix[j++] = desempilhar(ops);
+            }
+            empilhar(ops, infix[i]);
+        }
+    }
+
+    while (!pilhaEstaVazia(*ops)) {
+        posfix[j++] = desempilhar(ops);
+    }
+
+    posfix[j] = '\0'; // Adicionar o caractere nulo para terminar a string.
+}
+
+float analisaExpressao(char posfix[]) {
     Pilha *p1 = criaPilha();
     float resultado = 0;
     float aux;
 
     for (int i = 0; posfix[i] != '\0'; i++) {
         if (posfix[i] >= '0' && posfix[i] <= '9') {
-            aux = posfix[i] - '0'; 
+            aux = posfix[i] - '0'; // Converte char para float
             empilhar(p1, aux);
         } else {
             float n2 = desempilhar(p1);
@@ -113,16 +99,16 @@ double analisaExpressao(char posfix[]) {
 
             switch (posfix[i]) {
                 case '/':
-                    empilhar(p1, n1 / n2);
+                    empilhar(p1, (float) n1 / n2);
                     break;
                 case '*':
-                    empilhar(p1, n1 * n2);
+                    empilhar(p1, (float) n1 * n2);
                     break;
                 case '+':
-                    empilhar(p1, n1 + n2);
+                    empilhar(p1, (float) n1 + n2);
                     break;
                 case '-':
-                    empilhar(p1, n1 - n2);
+                    empilhar(p1, (float) n1 - n2);
                     break;
                 default:
                     break;
@@ -130,7 +116,7 @@ double analisaExpressao(char posfix[]) {
         }
     }
 
-    resultado = desempilhar(p1);
+    resultado = (float) desempilhar(p1);
     return resultado;
 }
 
