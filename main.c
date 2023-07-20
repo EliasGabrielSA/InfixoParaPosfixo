@@ -81,17 +81,17 @@ void infixaParaPosfixa(char infix[], char posfix[]) {
         posfix[j++] = desempilhar(ops);
     }
 
-    posfix[j] = '\0'; // Adicionar o caractere nulo para terminar a string.
+    posfix[j] = '\0';
 }
 
 float analisaExpressao(char posfix[]) {
     Pilha *p1 = criaPilha();
     float resultado = 0;
-    float aux;
+    float aux, aux_resto = 0, a1, a2;
 
     for (int i = 0; posfix[i] != '\0'; i++) {
         if (posfix[i] >= '0' && posfix[i] <= '9') {
-            aux = posfix[i] - '0'; // Converte char para float
+            aux = posfix[i] - '0';
             empilhar(p1, aux);
         } else {
             float n2 = desempilhar(p1);
@@ -99,16 +99,23 @@ float analisaExpressao(char posfix[]) {
 
             switch (posfix[i]) {
                 case '/':
-                    empilhar(p1, (float) n1 / n2);
+                    a1 = n1 / n2;
+                    a2 = n1 / n2;
+
+                    if(a1 > a2) {
+                        aux_resto += a1 - a2;
+                    } else aux_resto += a2 - a1;
+
+                    empilhar(p1, a2);
                     break;
                 case '*':
-                    empilhar(p1, (float) n1 * n2);
+                    empilhar(p1, n1 * n2);
                     break;
                 case '+':
-                    empilhar(p1, (float) n1 + n2);
+                    empilhar(p1, n1 + n2);
                     break;
                 case '-':
-                    empilhar(p1, (float) n1 - n2);
+                    empilhar(p1, n1 - n2);
                     break;
                 default:
                     break;
@@ -116,7 +123,7 @@ float analisaExpressao(char posfix[]) {
         }
     }
 
-    resultado = (float) desempilhar(p1);
+    resultado = desempilhar(p1) + aux_resto;
     return resultado;
 }
 
