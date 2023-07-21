@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define MAX 100
 
@@ -8,6 +9,11 @@ typedef struct _pilha {
     char elementos[MAX];
     int topo;
 } Pilha;
+
+typedef struct _pilhafloat {
+    double elementos[MAX];
+    int topo;
+} PilhaFloat;
 
 short int pilhaEstaVazia(Pilha p) {
     if (p.topo == -1)
@@ -43,12 +49,73 @@ Pilha *criaPilha() {
     return novaPilha;
 }
 
+short int pilhaFloatEstaVazia(PilhaFloat p) {
+    if (p.topo == -1)
+        return 1;
+    else 
+        return 0;
+}
+
+void empilharFloat(PilhaFloat *p, double elem) {
+    if (p->topo < MAX - 1) {
+        p->elementos[++p->topo] = elem;
+    } else {
+        printf("stack overflow\n");
+    }
+}
+
+double desempilharFloat(PilhaFloat *p) {
+    double ret;
+    if (!pilhaFloatEstaVazia(*p)) {
+        ret = p->elementos[p->topo--];
+    } else {
+        printf("stack underflow\n");
+        ret = p->topo;
+    }
+    return ret;
+}
+
+PilhaFloat *criaPilhaFloat() {
+    PilhaFloat *novaPilha = (PilhaFloat*) malloc(sizeof(PilhaFloat));
+    if (novaPilha != NULL) {
+        novaPilha->topo = -1;
+    }
+    return novaPilha;
+}
+
 int precedencia(char op) {
     if (op == '+' || op == '-')
         return 1;
     else if (op == '*' || op == '/')
         return 2;
     return 0;
+}
+
+float converteCaracter(char caracter) {
+    switch (caracter) {
+        case '0':
+            return 0.0;
+        case '1':
+            return 1.0;
+        case '2':
+            return 2.0;
+        case '3':
+            return 3.0;
+        case '4':
+            return 4.0;
+        case '5':
+            return 5.0;
+        case '6':
+            return 6.0;
+        case '7':
+            return 7.0;
+        case '8':
+            return 8.0;
+        case '9':
+            return 9.0;
+        default:
+            return -1.0;
+    }
 }
 
 void infixaParaPosfixa(char infix[], char posfix[]) {
@@ -85,46 +152,36 @@ void infixaParaPosfixa(char infix[], char posfix[]) {
 }
 
 float analisaExpressao(char posfix[]) {
-    Pilha *p1 = criaPilha();
-    float resultado = 0;
-    float aux, aux_resto = 0, a1, a2;
+    PilhaFloat *p1 = criaPilhaFloat();
+    double aux;
 
-    for (int i = 0; posfix[i] != '\0'; i++) {
+    for (int i = 0; i < strlen(posfix); i++) {
         if (posfix[i] >= '0' && posfix[i] <= '9') {
-            aux = posfix[i] - '0';
-            empilhar(p1, aux);
+            aux = converteCaracter(posfix[i]);
+            empilharFloat(p1, aux);
         } else {
-            float n2 = desempilhar(p1);
-            float n1 = desempilhar(p1);
+            float n2 = desempilharFloat(p1);
+            float n1 = desempilharFloat(p1);
 
             switch (posfix[i]) {
                 case '/':
-                    a1 = n1 / n2;
-                    a2 = n1 / n2;
-
-                    if(a1 > a2) {
-                        aux_resto += a1 - a2;
-                    } else aux_resto += a2 - a1;
-
-                    empilhar(p1, a2);
+                    empilharFloat(p1, n1 / n2);
                     break;
                 case '*':
-                    empilhar(p1, n1 * n2);
+                    empilharFloat(p1, n1 * n2);
                     break;
                 case '+':
-                    empilhar(p1, n1 + n2);
+                    empilharFloat(p1, n1 + n2);
                     break;
                 case '-':
-                    empilhar(p1, n1 - n2);
+                    empilharFloat(p1, n1 - n2);
                     break;
                 default:
                     break;
             }
         }
     }
-
-    resultado = desempilhar(p1) + aux_resto;
-    return resultado;
+    return desempilharFloat(p1);
 }
 
 int main() {
@@ -138,7 +195,9 @@ int main() {
 
     printf("Infixa: %s\n", infix_ex);
     printf("Posfixa: %s\n", posfix_ex);
-    printf("Resultado: %.2f\n", analisaExpressao(posfix_ex));
+    
+    float resultado = ceil(analisaExpressao(posfix_ex) * 100) / 100;
+    printf("Resultado: %.2f\n", resultado);
 
     return 0;
 }
